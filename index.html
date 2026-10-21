@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090d16">
+  <title>Умные Заметки — PRO</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Неоновые фоновые сферы -->
+  <div class="ambient-bg">
+    <div class="orb orb-purple"></div>
+    <div class="orb orb-teal"></div>
+    <div class="orb orb-amber"></div>
+  </div>
+
+  <!-- Боковая панель -->
+  <aside class="sidebar glass-panel">
+    <div class="sidebar-header">
+      <div class="app-title-row">
+        <div class="app-title">
+          <span class="logo-badge">⚡</span>
+          <span>Умные Заметки</span>
+        </div>
+        <div class="toolbar-group">
+          <button class="icon-btn" id="installPwaBtn" title="Установить приложение (PWA)" style="display: none;">📲</button>
+          <button class="icon-btn" id="importBtn" title="Импорт бэкапа (.json)">📂</button>
+          <input type="file" id="importFileInput" accept=".json,application/json" hidden>
+          <button class="icon-btn" id="exportBtn" title="Скачать бэкап (.json)">💾</button>
+          <button class="icon-btn" id="themeBtn" title="Переключить тему">🌓</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="newNoteBtn">
+        <span>+ Создать заметку</span>
+        <kbd class="shortcut-hint">⌘N</kbd>
+      </button>
+
+      <div class="search-wrapper">
+        <input type="text" class="search-input" id="searchInput" placeholder="Поиск по заголовку и тексту...">
+        <button class="clear-search-btn" id="clearSearchBtn" title="Очистить поиск" hidden>✕</button>
+      </div>
+
+      <div class="tags-filter" id="tagsFilter">
+        <button class="tag-chip active" data-tag="Все">Все</button>
+        <button class="tag-chip" data-tag="Работа">💼 Работа</button>
+        <button class="tag-chip" data-tag="Личное">🏠 Личное</button>
+        <button class="tag-chip" data-tag="Идеи">💡 Идеи</button>
+        <button class="tag-chip" data-tag="Срочно">🔥 Срочно</button>
+      </div>
+    </div>
+
+    <div class="notes-list" id="notesList"></div>
+  </aside>
+
+  <!-- Основная рабочая область -->
+  <main class="editor-area glass-panel" id="editorArea">
+    <div class="editor-toolbar">
+      <div class="toolbar-group">
+        <select class="category-select" id="noteCategory">
+          <option value="Работа">💼 Работа</option>
+          <option value="Личное">🏠 Личное</option>
+          <option value="Идеи">💡 Идеи</option>
+          <option value="Срочно">🔥 Срочно</option>
+        </select>
+        <button class="icon-btn" id="pinNoteBtn" title="Закрепить заметку">📌 Закрепить</button>
+        <button class="icon-btn" id="addTodoBtn" title="Вставить чек-бокс задачи">☑️ Чек-бокс</button>
+        <button class="icon-btn" id="addDateBtn" title="Вставить текущую дату">📅 Дата</button>
+      </div>
+
+      <div class="toolbar-group">
+        <div class="view-mode-group" id="viewModeGroup">
+          <button class="mode-btn" data-mode="edit" title="Только редактор">✏️ Редактор</button>
+          <button class="mode-btn active" data-mode="split" title="Редактор и превью">🌗 Сплит</button>
+          <button class="mode-btn" data-mode="preview" title="Только просмотр Markdown">👁️ Просмотр</button>
+        </div>
+        <button class="icon-btn" id="downloadMdBtn" title="Скачать как .md">⬇️ .MD</button>
+        <button class="icon-btn" id="downloadTxtBtn" title="Скачать как .txt">📄 .TXT</button>
+        <button class="icon-btn btn-danger" id="deleteNoteBtn" title="Удалить заметку">🗑️</button>
+      </div>
+    </div>
+
+    <div class="editor-body">
+      <input type="text" class="title-input" id="noteTitle" placeholder="Заголовок заметки...">
+
+      <div class="workspace mode-split" id="workspace">
+        <textarea class="content-textarea" id="noteContent" placeholder="Начните писать здесь... Поддерживается Markdown и интерактивные чек-боксы (- [ ] или ☐)"></textarea>
+        <div class="markdown-preview" id="markdownPreview"></div>
+      </div>
+    </div>
+
+    <div class="editor-footer">
+      <div class="footer-left">
+        <span class="status-dot"></span>
+        <span id="saveStatus">Все изменения сохранены</span>
+      </div>
+      <div class="footer-right">
+        <span id="tasksProgress"></span>
+        <span id="wordCount">0 слов • 0 символов</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Модальное окно для импорта / удаления -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal-card glass-panel">
+      <h3 class="modal-title" id="modalTitle">Подтверждение</h3>
+      <p class="modal-text" id="modalText"></p>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <!-- Всплывающие уведомления -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
