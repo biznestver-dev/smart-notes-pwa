@@ -65,6 +65,7 @@ const markdownPreviewEl = document.getElementById('markdownPreview');
 const workspaceEl = document.getElementById('workspace');
 const noteCategoryEl = document.getElementById('noteCategory');
 const pinNoteBtn = document.getElementById('pinNoteBtn');
+const voiceBtn = document.getElementById('voiceBtn');
 const deleteNoteBtn = document.getElementById('deleteNoteBtn');
 const newNoteBtn = document.getElementById('newNoteBtn');
 const searchInput = document.getElementById('searchInput');
@@ -150,9 +151,9 @@ function getTaskStats(content = '') {
   let total = 0;
   let done = 0;
   lines.forEach(line => {
-    if (/^\s*(?:[-*]\s+\[[ xX]\]|[☐☑])/u.test(line)) {
+    if (/^\s*(?:[-*]\s+[[ xX]]|[☐☑])/u.test(line)) {
       total++;
-      if (/^\s*(?:[-*]\s+\[[xX]\]|☑)/u.test(line)) done++;
+      if (/^\s*(?:[-*]\s+[[xX]]|☑)/u.test(line)) done++;
     }
   });
   return { total, done };
@@ -466,6 +467,112 @@ viewModeGroup.addEventListener('click', (e) => {
   if (!btn) return;
   applyViewMode(btn.dataset.mode);
 });
+
+// Голосовой ввод (Speech Recognition)
+let recognition = null;
+let isRecording = false;
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ru-RU';
+  recognition.interimResults = true;
+  recognition.continuous = true;
+
+  recognition.onresult = (event) => {
+    let interimTranscript = '';
+    let finalTranscript = '';
+
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript;
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
+    }
+
+    if (finalTranscript) {
+      insertTextAtCursor(finalTranscript.trim() + ' ');
+    }
+  };
+
+  recognition.onerror = (event) => {
+    console.warn('Ошибка распознавания речи:', event.error);
+    stopRecording();
+    if (event.error === 'not-allowed') {
+      showToast('Доступ к микрофону заблокирован в настройках браузера');
+    } else {
+      showToast('Ошибка голосового ввода');
+    }
+  };
+
+  recognition.onend = () => {
+    if (isRecording) {
+      try {
+        recognition.start();
+      } catch (e) {
+        stopRecording();
+      }
+    }
+  };
+} else {
+  if (voiceBtn) voiceBtn.style.display = 'none';
+}
+
+function startRecording() {
+  if (!recognition) return;
+  try {
+    recognition.start();
+    isRecording = true;
+    voiceBtn.classList.add('recording');
+    voiceBtn.title = 'Слушаю... (нажмите для остановки)';
+    showToast('Слушаю вас...');
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function stopRecording() {
+  if (!recognition) return;
+  isRecording = false;
+  try {
+    recognition.stop();
+  } catch (e) {}
+  voiceBtn.classList.remove('recording');
+  voiceBtn.title = 'Голосовой ввод';
+}
+
+function insertTextAtCursor(textToInsert) {
+  const note = notes.find(n => n.id === activeNoteId);
+  if (!note) return;
+
+  const cursor = noteContentEl.selectionStart ?? noteContentEl.value.length;
+  const text = noteContentEl.value;
+  const prefix = (cursor > 0 && !/\s$/.test(text.slice(0, cursor))) ? ' ' : '';
+  
+  noteContentEl.value = text.slice(0, cursor) + prefix + textToInsert + text.slice(cursor);
+  updateActiveNote();
+  
+  const newPos = cursor + prefix.length + textToInsert.length;
+  noteContentEl.focus();
+  noteContentEl.setSelectionRange(newPos, newPos);
+}
+
+if (voiceBtn) {
+  voiceBtn.addEventListener('click', () => {
+    if (!SpeechRecognition) {
+      showToast('Ваш браузер не поддерживает голосовой ввод');
+      return;
+    }
+    if (isRecording) {
+      stopRecording();
+      showToast('Голосовой ввод остановлен');
+    } else {
+      startRecording();
+    }
+  });
+}
 
 // Создание новой заметки
 function createNewNote() {
