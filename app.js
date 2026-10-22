@@ -151,9 +151,9 @@ function getTaskStats(content = '') {
   let total = 0;
   let done = 0;
   lines.forEach(line => {
-    if (/^\s*(?:[-*]\s+[[ xX]]|[☐☑])/u.test(line)) {
+    if (/^\s*(?:[-*]\s+[ xX]|[☐☑])/u.test(line)) {
       total++;
-      if (/^\s*(?:[-*]\s+[[xX]]|☑)/u.test(line)) done++;
+      if (/^\s*(?:[-*]\s+[xX]|☑)/u.test(line)) done++;
     }
   });
   return { total, done };
@@ -773,7 +773,7 @@ importFileInput.addEventListener('change', (e) => {
               notes.forEach(n => map.set(String(n.id), n));
               importedNotes.forEach(inc => {
                 const key = String(inc.id);
-                const existing = map.get(key);
+                const existing = map.set(key, inc);
                 if (!existing || new Date(inc.updatedAt) >= new Date(existing.updatedAt)) {
                   map.set(key, inc);
                 }
