@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-notes-pro-v1';
+const CACHE_NAME = 'smart-notes-pro-v2';
 const ASSETS = [
   './',
   './index.html',

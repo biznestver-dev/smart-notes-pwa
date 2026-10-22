@@ -574,18 +574,29 @@ if (voiceBtn) {
   });
 }
 
-// Создание новой заметки
+// Создание новой заметки (сбрасываем поиск и фильтр "Все", чтобы новая запись точно была видна)
 function createNewNote() {
+  searchQuery = '';
+  searchInput.value = '';
+  clearSearchBtn.hidden = true;
+
+  currentFilterTag = 'Все';
+  document.querySelectorAll('.tag-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.tag === 'Все');
+  });
+
   const newNote = {
     id: Date.now(),
     title: '',
     content: '',
-    category: currentFilterTag === 'Все' ? 'Работа' : currentFilterTag,
+    category: 'Работа',
     pinned: false,
     updatedAt: new Date().toISOString()
   };
+  
   notes.unshift(newNote);
   activeNoteId = newNote.id;
+  
   saveNotes();
   renderNotesList();
   renderActiveNote();
@@ -662,7 +673,7 @@ tagsFilterEl.addEventListener('click', (e) => {
   renderNotesList();
 });
 
-// Быстрая вставка интерактивного чек-бокса (исправлено)
+// Быстрая вставка интерактивного чек-бокса
 addTodoBtn.addEventListener('click', () => {
   const note = notes.find(n => n.id === activeNoteId);
   if (!note) return;
