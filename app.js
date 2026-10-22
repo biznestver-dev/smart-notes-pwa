@@ -662,7 +662,7 @@ tagsFilterEl.addEventListener('click', (e) => {
   renderNotesList();
 });
 
-// Быстрая вставка интерактивного чек-бокса
+// Быстрая вставка интерактивного чек-бокса (исправлено)
 addTodoBtn.addEventListener('click', () => {
   const note = notes.find(n => n.id === activeNoteId);
   if (!note) return;
